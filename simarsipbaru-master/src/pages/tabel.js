@@ -5,6 +5,7 @@ import Cookies from "js-cookie";
 import { useTable, useSortBy } from "react-table"; // Import react-table hooks
 import { ImSearch } from "react-icons/im";
 import { useLocation } from "react-router-dom";
+import {FaSortUp, FaSortDown} from "react-icons/fa";
 
 const Tabel = ({ data }) => {
   const [isLogin, setIsLogin] = useState(false);
@@ -16,11 +17,20 @@ const Tabel = ({ data }) => {
   const [paginatedData, setPaginatedData] = useState([]);
   const [filteredArchiveData, setFilteredArchiveData] = useState([]);
   const location = useLocation();
+  const currentPath = location.pathname;
   const searchParam = new URLSearchParams(location.search).get("search");
 
 
   const columns = React.useMemo(
     () => [
+      {
+        Header: "Waktu",
+        accessor: "archive_timestamp",
+        Cell: ({ value }) => {
+          const options = { day: "numeric", month: "long", year: "numeric" };
+          return new Date(value).toLocaleDateString(undefined, options);
+        },
+      },
       {
         Header: "Tanggal Terbit",
         accessor: "archive_release_date",
@@ -28,6 +38,10 @@ const Tabel = ({ data }) => {
           const options = { day: "numeric", month: "long", year: "numeric" };
           return new Date(value).toLocaleDateString(undefined, options);
         },
+      },
+      {
+        Header: "Kode",
+        accessor: "archive_code",
       },
       {
         Header: "Jenis",
@@ -182,9 +196,20 @@ useEffect(() => {
   // Handle search button click
   const handleSearchClick = () => {
     setCurrentPage(1);
-    navigate(
-      `/${Cookies.get("role")}/tabel?search=${encodeURIComponent(searchTerm)}`
-    );
+    const role = Cookies.get("role");
+    // navigate(
+    //   `/dashboard/tabel?search=${encodeURIComponent(searchTerm)}`
+    //);
+    if (role === 'pimpinan' && currentPath===`/pimpinan/tabel` || role === 'admin' && currentPath===`/pimpinan/tabel`){
+      navigate(
+        `/pimpinan/tabel?search=${encodeURIComponent(searchTerm)}`
+      );
+    }
+    else {
+      navigate(
+        `/dashboard/tabel?search=${encodeURIComponent(searchTerm)}`
+      );
+    }
   };
 
   // Handle Enter key press in the search input
@@ -229,8 +254,8 @@ useEffect(() => {
                       <span>
                         {column.isSorted
                           ? column.isSortedDesc
-                            ? " 🔽"
-                            : " 🔼"
+                            ? (<FaSortDown className="fs-5"/>)
+                            : (<FaSortUp className="fs-5"/>)
                           : ""}
                       </span>
                     </th>

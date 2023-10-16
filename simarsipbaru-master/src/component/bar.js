@@ -1,6 +1,6 @@
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { RxLayers, RxDashboard } from "react-icons/rx";
-import { BiLogOut, BiFoodMenu } from "react-icons/bi";
+import { BiLogOut, BiFoodMenu, BiTime } from "react-icons/bi";
 import { useEffect, useState } from "react";
 import { HiOutlineUsers } from "react-icons/hi";
 import Icon from "../images/logopolos.png";
@@ -18,10 +18,12 @@ export const Bar = () => {
       const userLink = document.getElementById("manajemenuser");
       const userLink2 = document.getElementById("eisbar")
       const userLink3 = document.getElementById("masterbar")
+      const userLink4 = document.getElementById("log")
       if (userLink && userLink2 && userLink3) {
         userLink.classList.add("d-none");
         userLink2.classList.add("d-none");
         userLink3.classList.add("d-none");
+        userLink4.classList.add("d-none");
       }
     }
   });
@@ -156,6 +158,23 @@ export const Bar = () => {
             <BiFoodMenu className="me-2 col-12 col-md-3" />
             <span className="col-md-4 d-none d-md-block w-100">
               Master
+            </span>
+          </a>
+        </li>
+        <li
+          className="nav-item mb-3 col-12 col-md-12  "
+          data-placement="right"
+          title="Log"
+          id="Logbar"
+          >
+          <a
+            id="log"
+            class="nav-link text-white"
+            href={`/dashboard/log`}
+          >
+            <BiTime className="me-2 col-12 col-md-3" />
+            <span className="col-md-4 d-none d-md-block w-100">
+              Log
             </span>
           </a>
         </li>

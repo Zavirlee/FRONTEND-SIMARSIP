@@ -6,7 +6,7 @@ import { BsPlusSquare } from "react-icons/bs";
 import { FaEdit } from "react-icons/fa";
 import { MdOutlineDeleteOutline } from "react-icons/md";
 import Icon from "../images/logopolos.png";
-import { FiCheckCircle } from "react-icons/fi";
+import { FiCheckCircle, FiXCircle } from "react-icons/fi";
 
 export const DetailTabel = () => {
   const [catalogData, setCatalogData] = useState([]);
@@ -16,6 +16,7 @@ export const DetailTabel = () => {
   const [filteredCatalog, setFilteredCatalog] = useState([]);
   const [showModalHapus, setShowModalHapus] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showModalGagalHapus, setShowModalGagalHapus] = useState(false);
   const [hapusLabel, setHapusLabel] = useState([])
 
   const { id } = useParams();
@@ -175,8 +176,16 @@ export const DetailTabel = () => {
     // Close the modal when needed
     setShowModalHapus(false);
     setShowModal(false);
-    window.location.reload();
     e.stopPropagation();
+  };
+  const handleModalGagalHapusOpen = () => {
+    setShowModalGagalHapus(true);
+
+  };
+  const handleModalGagalHapusClose = () => {
+    setShowModalGagalHapus(false);
+    setShowModal(false);
+
   };
 
 
@@ -190,14 +199,21 @@ export const DetailTabel = () => {
       const response = await axios.post(
         `${process.env.REACT_APP_PATH}/${idToColumnsMapping[id][3]}`,
         {
+          ip: Cookies.get("ip"),
+          token: Cookies.get("token"),
           data
         }
       );
       setShowModalHapus(true)
       setShowModal(false)
+      setTimeout(() => {
+        setShowModalHapus(false)
+        window.location.reload();
+      }, 2000);
       
     } catch (error) {
       console.log("Error", error);
+      handleModalGagalHapusOpen()
     }
   };
 
@@ -244,6 +260,7 @@ export const DetailTabel = () => {
                 <tr
                   key={catalog[idToColumnsMapping[id][0]]}
                   onClick={() => handleCategoryClick(catalog[idToColumnsMapping[id][0]])}
+                  role="button"
                 >
                   <td className="text-center">{index + 1}</td>
                   <td className="text-center">{catalog[idToColumnsMapping[id][1]]}</td>
@@ -297,12 +314,12 @@ export const DetailTabel = () => {
                                     />
                                   </div>
                                   <div className="col">
-                                    <h5 className="modal-title">Hapus User</h5>
+                                    <h5 className="modal-title">Hapus Data</h5>
                                   </div>
                                 </div>
                               </div>
                               <div className="modal-body">
-                                <h6>Anda Yakin Ingin Menghapus User ini?</h6>
+                                <h6>Anda Yakin Ingin Menghapus Data ini?</h6>
                               </div>
                               <div className="modal-footer">
                                 <button
@@ -359,6 +376,37 @@ export const DetailTabel = () => {
           </div>
         </div>
         )}
+        {showModalGagalHapus && (
+        <div className="modal d-block" tabIndex="-1" role="dialog">
+          <div className="modal-dialog modal-dialog-centered" role="document">
+            <div className="modal-content">
+              <div className="modal-header d-flex justify-content-between align-items-center">
+                <div className="row align-items-center">
+                  <div className="col-auto">
+                    <img src={Icon} className="logopop" alt="Icon" />
+                  </div>
+                  <div className="col">
+                    <h4 className="modal-title">Sim Arsip</h4>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                  onClick={handleModalGagalHapusClose}
+                ></button>
+              </div>
+              <div className="modal-body text-center">
+                {/* Add your modal content here */}
+                <FiXCircle className="fs-1 text-danger " />
+                <h5 className="p-2 m-2">Tidak Dapat Menghapus Data</h5>
+                <h6 className="p-2 m-2">Data Digunakan Pada Arsip</h6>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
         </div>
         
       </div>

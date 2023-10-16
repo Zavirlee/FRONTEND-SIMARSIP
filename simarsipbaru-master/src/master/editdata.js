@@ -2,25 +2,18 @@ import React, { useEffect, useState } from "react";
 import { BiHide, BiShow } from "react-icons/bi";
 import validator from "validator";
 import Icon from "../images/logopolos.png";
-import { FiCheckCircle } from "react-icons/fi";
+import { FiCheckCircle, FiXCircle } from "react-icons/fi";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useNavigate, useParams } from "react-router-dom";
 import Select from "react-select";
 
 export const EditData = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
-  const [confirmPasswordErrorMessage, setConfirmPasswordErrorMessage] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [selectedRoleOption, setSelectedRoleOption] = useState("");
+  const [showModalAda, setShowModalAda] = useState(false);
+  const [showModalGagal, setShowModalGagal] = useState(false);
   const navigate = useNavigate();
-
-  const {id1, id2 , id3} = useParams()
+  const { id1, id2, id3 } = useParams();
 
   const idToColumnsMapping = {
     "INDEKS KATALOG": [
@@ -104,64 +97,41 @@ export const EditData = () => {
   const handleModalOpen = () => {
     // Open the modal when needed
     setShowModal(true);
+    setTimeout(() => {
+      setShowModal(false);
+      navigate(`/dashboard/master/detailtabel/${id1}`);
+      // window.location.reload();
+    }, 2000);
   };
 
   const handleModalClose = () => {
     // Close the modal when needed
     setShowModal(false);
-    navigate(`/dashboard/master`);
-    window.location.reload();
+    navigate(`/dashboard/master/detailtabel/${id1}`);
+    // window.location.reload();
   };
+  const handleModalAdaOpen = () => {
+    setShowModalAda(true);
 
-  const validatePassword = (value) => {
-    setPassword(value);
-
-    if (
-      validator.isStrongPassword(value, {
-        minLength: 8,
-        minLowercase: 1,
-        minUppercase: 1,
-        minNumbers: 1,
-        minSymbols: 1,
-      })
-    ) {
-      setPasswordErrorMessage("");
-    } else {
-      setPasswordErrorMessage("Password Lemah");
-    }
   };
+  const handleModalAdaClose = () => {
+    setShowModalAda(false);
 
-  const validateConfirmPassword = (value) => {
-    setConfirmPassword(value);
-
-    if (value === password) {
-      setConfirmPasswordErrorMessage("");
-    } else {
-      setConfirmPasswordErrorMessage("Konfirmasi Password Tidak Sama");
-    }
   };
+  const handleModalGagalOpen = () => {
+    setShowModalGagal(true);
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
   };
+  const handleModalGagalClose = () => {
+    setShowModalGagal(false);
 
-  const toggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword(!showConfirmPassword);
   };
-  const selectRoleOptions = [
-    { value: "1", label: "Admin" },
-    { value: "2", label: "Operator" },
-    { value: "3", label: "Pimpinan" },
-  ];
-  const handleSelectRoleChange = (selectedRoleOption) => {
-    setSelectedRoleOption(selectedRoleOption);
-    // setCatalogValue(selectedCatalogOption.value); // Gunakan selectedOption.value untuk mengatur catalogValue
-  };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const formTambahUser = new FormData(document.getElementById("tambah-label"));
+    const formTambahUser = new FormData(
+      document.getElementById("tambah-label")
+    );
 
     const data = {};
 
@@ -169,20 +139,28 @@ export const EditData = () => {
       data[key] = value;
     }
 
-    data['id'] = id3
+    data["id"] = id3;
 
     try {
-      const response = await axios.post(`${process.env.REACT_APP_PATH}/${idToColumnsMapping[id1][4]}`, {
-        data: data,
-      });
+      const response = await axios.post(
+        `${process.env.REACT_APP_PATH}/${idToColumnsMapping[id1][4]}`,
+        {
+          ip: Cookies.get("ip"),
+          token: Cookies.get("token"),
+          data: data,
+        }
+      );
       console.log(response.data);
       handleModalOpen();
     } catch (error) {
       const errorText = error.response.data;
-      console.error("Error:", error);
-
-      if (errorText === "Error: Username yang anda pilih sudah digunakan"){
-        alert("Username yang anda pilih sudah digunakan");
+      if (errorText === "Error: Data yang anda masukkan sudah ada") {
+        handleModalAdaOpen()
+      } else if (errorText === "Error: Gagal memperbarui data"){
+        handleModalGagalOpen()
+      }
+      else {
+        console.error("Error:", error);
       }
     }
   };
@@ -245,6 +223,66 @@ export const EditData = () => {
                 {/* Add your modal content here */}
                 <FiCheckCircle className="fs-1 text-success " />
                 <h5 className="p-2 m-2">Data Berhasil Di edit</h5>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showModalAda && (
+        <div className="modal d-block" tabIndex="-1" role="dialog">
+          <div className="modal-dialog modal-dialog-centered" role="document">
+            <div className="modal-content">
+              <div className="modal-header d-flex justify-content-between align-items-center">
+                <div className="row align-items-center">
+                  <div className="col-auto">
+                    <img src={Icon} className="logopop" alt="Icon" />
+                  </div>
+                  <div className="col">
+                    <h4 className="modal-title">Sim Arsip</h4>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                  onClick={handleModalAdaClose}
+                ></button>
+              </div>
+              <div className="modal-body text-center">
+                {/* Add your modal content here */}
+                <FiXCircle className="fs-1 text-danger " />
+                <h5 className="p-2 m-2">Data Sudah Ada</h5>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showModalGagal && (
+        <div className="modal d-block" tabIndex="-1" role="dialog">
+          <div className="modal-dialog modal-dialog-centered" role="document">
+            <div className="modal-content">
+              <div className="modal-header d-flex justify-content-between align-items-center">
+                <div className="row align-items-center">
+                  <div className="col-auto">
+                    <img src={Icon} className="logopop" alt="Icon" />
+                  </div>
+                  <div className="col">
+                    <h4 className="modal-title">Sim Arsip</h4>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                  onClick={handleModalGagalClose}
+                ></button>
+              </div>
+              <div className="modal-body text-center">
+                {/* Add your modal content here */}
+                <FiXCircle className="fs-1 text-danger " />
+                <h5 className="p-2 m-2">Data Gagal diperbarui</h5>
               </div>
             </div>
           </div>

@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import Icon from "../images/logopolos.png";
-import { FiCheckCircle } from "react-icons/fi";
+import { FiCheckCircle, FiXCircle } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select";
 
@@ -24,12 +24,14 @@ export const Tambah = () => {
 
   const [viewPdf, setViewPdf] = useState(null);
   const [catalogValue, setCatalogValue] = useState("");
+  const [archiveCode, setArchiveCode] = useState([]);
   const [inputs, setInputs] = React.useState({});
   const [serialNumberValue, setSerialNumberValue] = useState("");
   const [file_numberValue, setFileNumberValue] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const newplugin = defaultLayoutPlugin();
   const [showModal, setShowModal] = useState(false);
+  const [showModalGagal, setShowModalGagal] = useState(false);
   const [catalogOption, setCatalogOption] = useState([]);
   const [selectedCatalogOption, setSelectedCatalogOption] = useState("");
   const [conditionOption, setConditionOption] = useState([]);
@@ -46,10 +48,17 @@ export const Tambah = () => {
   const [selectedRollopackOption, setSelectedRollopackOption] = useState("");
   const [cabinetOption, setCabinetOption] = useState([]);
   const [selectedCabinetOption, setSelectedCabinetOption] = useState("");
+  const [errorDataText, setErrorDataText] = useState([]);
 
   const handleModalOpen = () => {
     // Close the modal when needed
     setShowModal(true);
+    setTimeout(() => {
+      setShowModal(false);
+      navigate(`/dashboard`);
+      document.getElementById("tambah").classList.remove("act");
+      document.getElementById("tambah").classList.add("text-white");
+    }, 2000);
   };
   const handleModalClose = () => {
     // Close the modal when needed
@@ -57,6 +66,12 @@ export const Tambah = () => {
     navigate(`/dashboard`);
     document.getElementById("tambah").classList.remove("act");
     document.getElementById("tambah").classList.add("text-white");
+  };
+  const handleModalGagalOpen = () => {
+    setShowModalGagal(true);
+  };
+  const handleModalGagalClose = () => {
+    setShowModalGagal(false);
   };
 
   const handleChangePdf = (e) => {
@@ -87,14 +102,14 @@ export const Tambah = () => {
       document.getElementById("formIdentitas")
     );
     const formDataLokasi = new FormData(document.getElementById("formLokasi"));
-    const archive_code = document
-      .getElementById("archive_code")
-      .textContent.trim()
-      .slice(2);
+    // const archive_code = document
+    //   .getElementById("archive_code")
+    //   .textContent.trim()
+    //   .slice(2);
 
     const data = {};
 
-    data["archive_code"] = archive_code;
+    data["archive_code"] = archiveCode;
 
     for (const [key, value] of formDataIdentitas.entries()) {
       data[key] = value;
@@ -147,13 +162,23 @@ export const Tambah = () => {
     } catch (error) {
       const errorText = error.response.data;
       if (error === "ECONNRESET") {
+        setErrorDataText(error);
         // Handle ECONNRESET error
-        console.error("Connection reset by peer.");
+        // console.error("Connection reset by peer.");
+        handleModalGagalOpen();
       } else if (errorText === "Cannot Add Archive") {
-        alert("Data Tidak boleh dikosongkan");
+        setErrorDataText(errorText);
+        // alert("Data Tidak boleh dikosongkan");
+        handleModalGagalOpen();
+      } else if (errorText === "Data tidak boleh kosong") {
+        setErrorDataText(errorText);
+        // alert("Data Tidak boleh dikosongkan");
+        handleModalGagalOpen();
       } else {
         // Handle other errors
+        setErrorDataText(error);
         console.error("An error occurred:", error);
+        handleModalGagalOpen();
       }
     }
   };
@@ -166,7 +191,8 @@ export const Tambah = () => {
 
   useEffect(() => {
     // Fetch data from the database when the component mounts
-    axios.post(`${process.env.REACT_APP_PATH}/INDEKS%20KATALOG`) // Replace with your API endpoint
+    axios
+      .post(`${process.env.REACT_APP_PATH}/INDEKS%20KATALOG`) // Replace with your API endpoint
       .then((response) => {
         // Transform the fetched data into the format expected by react-select
         const transformedCatalogOptions = response.data.map((option) => ({
@@ -174,14 +200,14 @@ export const Tambah = () => {
           label: option.archive_catalog_label,
         }));
         setCatalogOption(transformedCatalogOptions);
-       
       })
       .catch((error) => {
         console.error("Error fetching data: ", error);
-        console.log(catalogOption)
+        console.log(catalogOption);
       });
 
-      axios.post(`${process.env.REACT_APP_PATH}/KONDISI`) // Replace with your API endpoint
+    axios
+      .post(`${process.env.REACT_APP_PATH}/KONDISI`) // Replace with your API endpoint
       .then((response) => {
         // Transform the fetched data into the format expected by react-select
         const transformedConditionOptions = response.data.map((option) => ({
@@ -189,13 +215,13 @@ export const Tambah = () => {
           label: option.archive_condition_label,
         }));
         setConditionOption(transformedConditionOptions);
-        
       })
       .catch((error) => {
         console.error("Error fetching data: ", error);
       });
 
-      axios.post(`${process.env.REACT_APP_PATH}/JENIS%20ARSIP`) // Replace with your API endpoint
+    axios
+      .post(`${process.env.REACT_APP_PATH}/JENIS%20ARSIP`) // Replace with your API endpoint
       .then((response) => {
         // Transform the fetched data into the format expected by react-select
         const transformedTypeOptions = response.data.map((option) => ({
@@ -203,13 +229,13 @@ export const Tambah = () => {
           label: option.archive_type_label,
         }));
         setTypeOption(transformedTypeOptions);
-        
       })
       .catch((error) => {
         console.error("Error fetching data: ", error);
       });
 
-      axios.post(`${process.env.REACT_APP_PATH}/KELAS%20ARSIP`) // Replace with your API endpoint
+    axios
+      .post(`${process.env.REACT_APP_PATH}/KELAS%20ARSIP`) // Replace with your API endpoint
       .then((response) => {
         // Transform the fetched data into the format expected by react-select
         const transformedClassOptions = response.data.map((option) => ({
@@ -217,13 +243,13 @@ export const Tambah = () => {
           label: option.archive_class_label,
         }));
         setClassOption(transformedClassOptions);
-        
       })
       .catch((error) => {
         console.error("Error fetching data: ", error);
       });
 
-      axios.post(`${process.env.REACT_APP_PATH}/GEDUNG`) // Replace with your API endpoint
+    axios
+      .post(`${process.env.REACT_APP_PATH}/GEDUNG`) // Replace with your API endpoint
       .then((response) => {
         // Transform the fetched data into the format expected by react-select
         const transformedBuildingOptions = response.data.map((option) => ({
@@ -231,13 +257,13 @@ export const Tambah = () => {
           label: option.loc_building_label,
         }));
         setBuildingOption(transformedBuildingOptions);
-        
       })
       .catch((error) => {
         console.error("Error fetching data: ", error);
       });
 
-      axios.post(`${process.env.REACT_APP_PATH}/RUANGAN`) // Replace with your API endpoint
+    axios
+      .post(`${process.env.REACT_APP_PATH}/RUANGAN`) // Replace with your API endpoint
       .then((response) => {
         // Transform the fetched data into the format expected by react-select
         const transformedRoomOptions = response.data.map((option) => ({
@@ -245,13 +271,13 @@ export const Tambah = () => {
           label: option.loc_room_label,
         }));
         setRoomOption(transformedRoomOptions);
-        
       })
       .catch((error) => {
         console.error("Error fetching data: ", error);
       });
 
-      axios.post(`${process.env.REACT_APP_PATH}/ROLL%20O%20PACK`) // Replace with your API endpoint
+    axios
+      .post(`${process.env.REACT_APP_PATH}/ROLL%20O%20PACK`) // Replace with your API endpoint
       .then((response) => {
         // Transform the fetched data into the format expected by react-select
         const transformedRollopackOptions = response.data.map((option) => ({
@@ -259,13 +285,13 @@ export const Tambah = () => {
           label: option.loc_rollopack_label,
         }));
         setRollopackOption(transformedRollopackOptions);
-        
       })
       .catch((error) => {
         console.error("Error fetching data: ", error);
       });
 
-      axios.post(`${process.env.REACT_APP_PATH}/LEMARI`) // Replace with your API endpoint
+    axios
+      .post(`${process.env.REACT_APP_PATH}/LEMARI`) // Replace with your API endpoint
       .then((response) => {
         // Transform the fetched data into the format expected by react-select
         const transformedCabinetOptions = response.data.map((option) => ({
@@ -273,35 +299,38 @@ export const Tambah = () => {
           label: option.loc_cabinet_label,
         }));
         setCabinetOption(transformedCabinetOptions);
-        
       })
       .catch((error) => {
         console.error("Error fetching data: ", error);
       });
-
-
-
   }, []);
 
   useEffect(() => {
-  generateArchiveCode(); // Call the function when either value changes
-}, [catalogValue, serialNumberValue]);
+    generateArchiveCode(); // Call the function when either value changes
+  }, [catalogValue, serialNumberValue]);
 
+  // function generateArchiveCode() {
+  //   const archive_code = `${catalogValue}/${serialNumberValue}`;
+  //   const archive_codeElement = document.getElementById("archive_code");
+  //   if (archive_codeElement) {
+  //     archive_codeElement.textContent = `${archive_code}`;
+  //     console.log("Archive Code:", archive_code);
+  //   }
+  // }
   function generateArchiveCode() {
-    const archiveCode = `${catalogValue}/${serialNumberValue}`;
-    const archiveCodeElement = document.getElementById("archive_code");
-    if (archiveCodeElement) {
-      archiveCodeElement.textContent = `${archiveCode}`;
-      console.log("Archive Code:", archiveCode);
+    const archive_code = `${catalogValue}/${serialNumberValue}`;
+    setArchiveCode(archive_code);
+    const archive_codeElement = document.getElementById("archive_code");
+    if (archive_codeElement) {
+      archive_codeElement.textContent = archive_code;
+      console.log("Archive Code:", archive_code);
     }
   }
-  
-
 
   const handleSelectCatalogChange = (selectedCatalogOption) => {
     setSelectedCatalogOption(selectedCatalogOption);
     setCatalogValue(selectedCatalogOption.value); // Gunakan selectedOption.value untuk mengatur catalogValue
-    console.log(catalogValue)
+    console.log(catalogValue);
   };
 
   const handleSelectConditionChange = (selectedConditionOption) => {
@@ -313,11 +342,9 @@ export const Tambah = () => {
     setSelectedTypeOption(selectedTypeOption);
   };
 
-
   const handleSelectClassOptions = (selectedClassOption) => {
     setSelectedClassOption(selectedClassOption);
   };
-
 
   const handleSelectBuildingOptions = (selectedBuildingOption) => {
     setSelectedBuildingOption(selectedBuildingOption);
@@ -661,6 +688,36 @@ export const Tambah = () => {
                 {/* Add your modal content here */}
                 <FiCheckCircle className="fs-1 text-success " />
                 <h5 className="p-2 m-2">Arsip Berhasil Ditambahkan</h5>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showModalGagal && (
+        <div className="modal d-block" tabIndex="-1" role="dialog">
+          <div className="modal-dialog modal-dialog-centered" role="document">
+            <div className="modal-content">
+              <div className="modal-header d-flex justify-content-between align-items-center">
+                <div className="row align-items-center">
+                  <div className="col-auto">
+                    <img src={Icon} className="logopop" alt="Icon" />
+                  </div>
+                  <div className="col">
+                    <h4 className="modal-title">Sim Arsip</h4>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                  onClick={handleModalGagalClose}
+                ></button>
+              </div>
+              <div className="modal-body text-center">
+                {/* Add your modal content here */}
+                <FiXCircle className="fs-1 text-danger " />
+                <h5 className="p-2 m-2">{errorDataText}</h5>
               </div>
             </div>
           </div>

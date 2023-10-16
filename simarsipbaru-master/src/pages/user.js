@@ -17,10 +17,10 @@ export const User = ({ data }) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredUser, setFilteredUser] = useState([]);
-  const [showModalHapus, setShowModalHapus] = useState(false)
+  const [showModalHapus, setShowModalHapus] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [hiddenDeleteButtons, setHiddenDeleteButtons] = useState([]);
-  const [hapusData, setHapusData] = useState([])
+  const [hapusData, setHapusData] = useState([]);
 
   const currentUserID = Cookies.get("user_id");
 
@@ -30,7 +30,7 @@ export const User = ({ data }) => {
 
   const handleHapusClick = (username) => {
     setShowModal(true);
-    setHapusData(username)
+    setHapusData(username);
   };
 
   const handleModalClose = (e) => {
@@ -46,17 +46,23 @@ export const User = ({ data }) => {
     e.stopPropagation();
   };
 
-
   const handleHapus = async () => {
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_PATH}/deleteUser`,
         {
+          ip: Cookies.get("ip"),
+          token: Cookies.get("token"),
           username: hapusData,
         }
       );
-      setShowModalHapus(true)
-      
+      setShowModalHapus(true);
+      setShowModal(false);
+      setTimeout(() => {
+        setShowModalHapus(false);
+        document.getElementById("detail").classList.add("d-none");
+        document.getElementById("table").classList.remove("col-md-9");
+      }, 2000);
     } catch (error) {
       console.log("Error", error);
     }
@@ -116,9 +122,10 @@ export const User = ({ data }) => {
           const columnsToSearch = [
             user.user_id,
             user.username,
-            user.password,
             user.level_user_label,
+            mapLoginSession(user.login_session),
             user.satker,
+            formatTimestamp(user.last_login)
             // Add more columns here if needed
           ];
 
@@ -138,17 +145,16 @@ export const User = ({ data }) => {
 
         // Membuat array yang menandakan apakah tombol hapus perlu disembunyikan atau tidak
         const hiddenButtons = filteredUser.map(
-          (user) => (user.user_id).toString() !== Cookies.get("user_id")
+          (user) => user.user_id.toString() !== Cookies.get("user_id")
         );
-        filteredUser.forEach((user)=>{
-          const {id} = toString(user.user_id)
-          if (id === Cookies.get("user_id")){
-            console.log("ketemu")
+        filteredUser.forEach((user) => {
+          const { id } = toString(user.user_id);
+          if (id === Cookies.get("user_id")) {
+            console.log("ketemu");
+          } else {
+            console.log(id);
           }
-          else {
-            console.log(id)
-          }
-        })
+        });
         setHiddenDeleteButtons(hiddenButtons);
       } catch (error) {
         console.error("Error", error);
@@ -168,6 +174,17 @@ export const User = ({ data }) => {
     });
   }, [navigate, searchTerm]);
 
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+    const hours = date.getUTCHours().toString().padStart(2, "0");
+    const minutes = date.getUTCMinutes().toString().padStart(2, "0");
+    const seconds = date.getUTCSeconds().toString().padStart(2, "0");
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  };
+
   // Handle search input change
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -175,9 +192,7 @@ export const User = ({ data }) => {
 
   // Handle search button click
   const handleSearchClick = () => {
-    navigate(
-      `/${Cookies.get("role")}/user?search=${encodeURIComponent(searchTerm)}`
-    );
+    navigate(`/dashboard/user?search=${encodeURIComponent(searchTerm)}`);
   };
 
   // Handle Enter key press in the search input
@@ -186,6 +201,8 @@ export const User = ({ data }) => {
       handleSearchClick();
     }
   };
+  const mapLoginSession = (loginSession) =>
+    loginSession != "0" ? "Aktif" : "Tidak Aktif";
 
   return (
     <div className="container-fluid">
@@ -224,20 +241,27 @@ export const User = ({ data }) => {
                 <tr>
                   <th scope="col">No</th>
                   <th scope="col">Username</th>
-                  <th scope="col">Password</th>
                   <th scope="col">Role</th>
                   <th scope="col">Satker</th>
+                  <th scope="col">Sesi</th>
+                  <th scope="col">Login Terakhir</th>
                   <th scope="col">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredUser.map((user, index) => (
-                  <tr key={user.user_id} onClick={() => handleDetail(user)} role="button">
+                  <tr
+                    key={user.user_id}
+                    onClick={() => handleDetail(user)}
+                    role="button"
+                  >
                     <td>{index + 1}</td>
                     <td>{user.username}</td>
-                    <td className="d-none d-md-block">{user.password}</td>
+                    {/* <td className="d-none d-md-block">{user.password}</td> */}
                     <td>{user.level_user_label}</td>
                     <td>{user.satker}</td>
+                    <td>{mapLoginSession(user.login_session)}</td>
+                    <td>{formatTimestamp(user.last_login)}</td>
                     <td className="d-none d-md-block">
                       <FaEdit
                         id="tomboledit"
@@ -376,35 +400,38 @@ export const User = ({ data }) => {
               ))}
             </div>
             {showModalHapus && (
-        <div className="modal d-block" tabIndex="-1" role="dialog">
-          <div className="modal-dialog modal-dialog-centered" role="document">
-            <div className="modal-content">
-              <div className="modal-header d-flex justify-content-between align-items-center">
-                <div className="row align-items-center">
-                  <div className="col-auto">
-                    <img src={Icon} className="logopop" alt="Icon" />
-                  </div>
-                  <div className="col">
-                    <h4 className="modal-title">Sim Arsip</h4>
+              <div className="modal d-block" tabIndex="-1" role="dialog">
+                <div
+                  className="modal-dialog modal-dialog-centered"
+                  role="document"
+                >
+                  <div className="modal-content">
+                    <div className="modal-header d-flex justify-content-between align-items-center">
+                      <div className="row align-items-center">
+                        <div className="col-auto">
+                          <img src={Icon} className="logopop" alt="Icon" />
+                        </div>
+                        <div className="col">
+                          <h4 className="modal-title">Sim Arsip</h4>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        className="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                        onClick={handleModalHapusClose}
+                      ></button>
+                    </div>
+                    <div className="modal-body text-center">
+                      {/* Add your modal content here */}
+                      <FiCheckCircle className="fs-1 text-success " />
+                      <h5 className="p-2 m-2">User Berhasil di Hapus</h5>
+                    </div>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  className="btn-close"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                  onClick={handleModalHapusClose}
-                ></button>
               </div>
-              <div className="modal-body text-center">
-                {/* Add your modal content here */}
-                <FiCheckCircle className="fs-1 text-success " />
-                <h5 className="p-2 m-2">User Berhasil di Hapus</h5>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+            )}
           </div>
         </div>
       </div>

@@ -18,11 +18,17 @@ export const UpdateUser = () => {
   const [userData, setUserData] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const { user_id } = useParams();
+  const [userDataUpdate, setUserDataUpdate] = useState([]);
   const navigate = useNavigate();
 
   const handleModalOpen = () => {
     // Close the modal when needed
     setShowModal(true);
+    setTimeout(() => {
+      setShowModal(false);
+      // navigate(`/dashboard/user`);
+      // window.location.reload();
+    }, 3000);
   };
   const handleModalClose = () => {
     // Close the modal when needed
@@ -86,27 +92,57 @@ export const UpdateUser = () => {
     fetchData();
   }, []);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setUserDataUpdate((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+    console.log(userDataUpdate);
+  };
 
-    const formTambahUser = new FormData(document.getElementById("updateUser"));
+  const handleSubmit = async () => {
+    // event.preventDefault();
 
-    console.log(formTambahUser);
+    // const formTambahUser = new FormData(document.getElementById("updateUser"));
 
-    const data = {};
-    formTambahUser.forEach((value, key) => {
-      data[key] = value;
-    });
+    // console.log(formTambahUser);
 
-    data["user_id"] = user_id;
+    // const data = {};
+    // formTambahUser.forEach((value, key) => {
+    //   data[key] = value;
+    // });
 
-    console.log(data);
+    userDataUpdate["user_id"] = user_id;
+    sendDataToServer(userDataUpdate)
 
+    // try {
+    //   const response = await axios.post(
+    //     `${process.env.REACT_APP_PATH}/uppdateUser`,
+    //     {
+    //       data: data,
+    //     }
+    //   );
+    //   console.log(response.data);
+    //   handleModalOpen();
+    // } catch (error) {
+    //   const errorText = error.response.data;
+    //   console.error("Error:", error);
+
+    //   if (errorText === "Error: Username yang anda pilih sudah digunakan") {
+    //     alert("Username yang anda pilih sudah digunakan");
+    //   }
+    // }
+  };
+
+  const sendDataToServer = async (userDataUpdate) => {
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_PATH}/uppdateUser`,
         {
-          data: data,
+          ip: Cookies.get("ip"),
+          token: Cookies.get("token"),
+          data: userDataUpdate,
         }
       );
       console.log(response.data);
@@ -119,7 +155,7 @@ export const UpdateUser = () => {
         alert("Username yang anda pilih sudah digunakan");
       }
     }
-  };
+  }
 
   return (
     <div className="container-fluid">
@@ -130,7 +166,6 @@ export const UpdateUser = () => {
               <h1 className="text-white text-center">Update User</h1>
             </div>
             <div className="row bg-white m-3 rounded p-4 ">
-
               <ul>
                 <li className="mb-3 row">
                   <label htmlFor="username" className="col-sm-2 col-form-label">
@@ -144,6 +179,7 @@ export const UpdateUser = () => {
                       name="username"
                       placeholder="Masukkan Username"
                       defaultValue={user.username}
+                      onChange={handleChange}
                     />
                   </div>
                 </li>
@@ -163,6 +199,7 @@ export const UpdateUser = () => {
                       style={{ width: "200px" }}
                       aria-label="Default select example"
                       defaultValue={user.level_user_id}
+                      onChange={handleChange}
                     >
                       <option selected>Pilih Role</option>
                       <option value="1" selected={user.level_user_id === 1}>
@@ -190,6 +227,7 @@ export const UpdateUser = () => {
                       name="satker"
                       placeholder="Masukkan Satker"
                       defaultValue={user.satker}
+                      onChange={handleChange}
                     />
                   </div>
                 </li>
@@ -205,7 +243,7 @@ export const UpdateUser = () => {
                         name="password"
                         className="form-control form-control-md"
                         placeholder="Masukkan Password"
-                        value={password}
+                        defaultValue={password}
                         onChange={(e) => validatePassword(e.target.value)}
                       />
                       <span

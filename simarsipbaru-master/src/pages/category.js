@@ -80,9 +80,20 @@ export const Category = () => {
 
   // Handle search button click
   const handleSearchClick = () => {
-    navigate(
-      `/${Cookies.get("role")}/category?search=${encodeURIComponent(searchTerm)}`
-    );
+    // navigate(
+    //   `/${Cookies.get("role")}/category?search=${encodeURIComponent(searchTerm)}`
+    // );
+    const role = Cookies.get("role");
+    if (role === 'pimpinan' && currentPath===`/pimpinan/category` || role === 'admin' && currentPath===`/pimpinan/category`){
+      navigate(
+        `/pimpinan/category?search=${encodeURIComponent(searchTerm)}`
+      );
+    }
+    else {
+      navigate(
+        `/dashboard/category?search=${encodeURIComponent(searchTerm)}`
+      );
+    }
   };
 
   // Handle Enter key press in the search input
@@ -128,6 +139,7 @@ export const Category = () => {
                 <tr
                   key={catalog.archive_catalog_id}
                   onClick={() => handleCategory(catalog.archive_catalog_id)}
+                  role="button"
                 >
                   <td class="text-center">{catalog.archive_catalog_id}</td>
                   <td class="text-center">{catalog.archive_catalog_label}</td>

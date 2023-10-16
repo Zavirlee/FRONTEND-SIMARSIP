@@ -35,12 +35,18 @@ export const TambahUser = () => {
   const handleModalOpen = () => {
     // Open the modal when needed
     setShowModal(true);
+    
+    setTimeout(() => {
+      setShowModal(false);
+      navigate(`/dashboard/user`);
+      // window.location.reload();
+    }, 2000);
   };
 
   const handleModalClose = () => {
     // Close the modal when needed
     setShowModal(false);
-    navigate(`/dashboard/user`);
+        navigate(`/dashboard/user`);
     window.location.reload();
   };
 
@@ -102,6 +108,8 @@ export const TambahUser = () => {
 
     try {
       const response = await axios.post(`${process.env.REACT_APP_PATH}/createUser`, {
+        ip: Cookies.get("ip"),
+        token: Cookies.get("token"),
         data: data,
       });
       console.log(response.data);

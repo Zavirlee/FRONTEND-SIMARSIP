@@ -17,6 +17,7 @@ export const Update = () => {
   const [serialNumberValue, setSerialNumberValue] = useState("");
   const newplugin = defaultLayoutPlugin();
   const [selectedFile, setSelectedFile] = useState(null);
+  const [fileData, setFileData] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [archiveData, setArchiveData] = useState([]);
   const [archiveDataupdate, setArchiveDataUpdate] = useState([]);
@@ -39,21 +40,29 @@ export const Update = () => {
   const handleModalOpen = () => {
     // Close the modal when needed
     setShowModal(true);
+    setTimeout(() => {
+      setShowModal(false);
+      navigate(`/dashboard/tabel/detail/${archive_id}`);
+      // navigate(`/dashboard/user`);
+    // window.location.reload();
+    }, 2000);
   };
   const handleModalClose = () => {
     // Close the modal when needed
     setShowModal(false);
-    navigate(`/dashboard`);
+    navigate(`/dashboard/tabel/detail/${archive_id}`);
   };
 
   const handleChangePdf = (e) => {
     document.getElementById("pdf-viewer").classList.remove("d-none");
     let selectedFile = e.target.files[0];
+    setSelectedFile(e.target.files[0]);
     console.log(selectedFile.size);
     if (selectedFile) {
       let reader = new FileReader();
       reader.readAsDataURL(selectedFile);
       reader.onload = (e) => {
+        setFileData(e.target.result.split(",")[1]);
         setViewPdf(e.target.result);
       };
     } else {
@@ -71,31 +80,22 @@ export const Update = () => {
   };
 
   const handleSubmit = async () => {
-    if (selectedFile) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64Data = reader.result.split(",")[1];
-        // 'base64Data' should be a valid Base64-encoded string
-        setArchiveDataUpdate((prevData) => ({
-          ...prevData,
-          archive_file: base64Data,
-        }));
-        console.log("base64 : ", base64Data);
-        // Send the 'archiveDataUpdate' object to the server
-        sendDataToServer(archiveDataupdate);
-      };
-      reader.readAsDataURL(selectedFile);
-    } else {
-      // If no file selected, send the 'archiveDataUpdate' without 'archive_file'
-      sendDataToServer(archiveDataupdate);
+    const updatedData = { ...archiveDataupdate };
+
+    if (fileData != "") {
+      updatedData["archive_file"] = fileData;
     }
-    console.log(archiveDataupdate);
-    // sendDataToServer(archiveDataupdate);
+
+    console.log(updatedData); // Now you can log the updatedData
+
+    // Send the 'updatedData' object to the server
+    sendDataToServer(updatedData);
   };
 
   const sendDataToServer = async (archiveDataupdate) => {
     try {
-      archiveDataupdate["archive_id"] = archive_id;
+      archiveDataupdate["archive_id"] = archive_id.toString();
+      console.log(archiveDataupdate);
       const response = await axios.post(
         `${process.env.REACT_APP_PATH}/updateArchive`,
         {
@@ -656,7 +656,7 @@ export const Update = () => {
                         (selectedOption) => {
                           handleChange({
                             target: {
-                              name: "archive_loc_cabinet_id",
+                              name: "archive_loc_cabinet",
                               value: selectedOption.value,
                             },
                           });

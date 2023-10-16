@@ -6,6 +6,16 @@ import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
 
+const getClientIP = async () => {
+  try {
+    const response = await axios.get(`${process.env.REACT_APP_PATH}/getIP`);
+    return response.data.ip;
+  } catch (error) {
+    console.error('Failed to get client IP', error);
+    return null;
+  }
+};
+
 export const Login = () => {
   const [usernameError, setUsernameError] = useState([]);
   const [passwordError, setPasswordError] = useState([]);
@@ -51,11 +61,13 @@ export const Login = () => {
     }
 
     try {
+      const clientIP = await getClientIP();
       const response = await axios.post(`${process.env.REACT_APP_PATH}/login`, {
         username: username,
         password: password,
       });
 
+      document.cookie = `ip=${clientIP}; Path=/`;
       document.cookie = `token=${response.data.token}; Path=/`;
       document.cookie = `user_id=${response.data.user_id}; Path=/`;
 

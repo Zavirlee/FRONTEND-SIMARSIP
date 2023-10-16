@@ -10,6 +10,8 @@ const Terbaru = ({ data }) => {
   const [archiveDataBaru, setArchiveDataBaru] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
+  const location = useLocation();
+  const currentPath = location.pathname;
 
   const checkAuthenticated = async () => {
     const token = Cookies.get("token");
@@ -49,15 +51,24 @@ const Terbaru = ({ data }) => {
       //     state: { archiveDataBaru },
       //   });
       // }
-      navigate(`/pimpinan/terbaru/detail/${archive_id}`, {
-        state: { archiveDataBaru },
-        })
+      if (role === 'pimpinan' && currentPath===`/pimpinan/terbaru` || role === 'admin' && currentPath===`/pimpinan/terbaru`){
+        navigate(`/pimpinan/terbaru/detail/${archive_id}`, {
+            state: { archiveDataBaru },
+          });
+      }
+      else {
+        navigate(`/dashboard/terbaru/detail/${archive_id}`, {
+            state: { archiveDataBaru },
+          });
+      }
+          // navigate(`/pimpinan/terbaru/detail/${archive_id}`, {
+      //   state: { archiveDataBaru },
+      //   })
     } catch (error) {
       console.log("Error", error);
     }
   };
 
-  const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const searchTerm = searchParams.get("search");
 
@@ -113,6 +124,7 @@ const Terbaru = ({ data }) => {
                 <tr
                   key={archive.archive_id}
                   onClick={() => handleDetail(archive.archive_id)}
+                  role="button"
                 >
                   <td>
                     {new Date(archive.archive_timestamp).toLocaleDateString()}

@@ -23,6 +23,7 @@ import { MasterTabel } from "./master/mastertabel";
 import { DetailTabel } from "./master/detailtabel";
 import { TambahData } from "./master/tambahdata";
 import { EditData } from "./master/editdata";
+import {Log} from "./master/log";
 
 function App() {
   function checkRole(desiredRole, path) {
@@ -31,7 +32,8 @@ function App() {
     if(path==="/dashboard"){
       if(userRole === "pimpinan"){
         return <Navigate to="/pimpinan" />;
-      } else {
+      } 
+      else {
         return <Layout/>
       }
     } else if(path==="/pimpinan"){
@@ -40,7 +42,7 @@ function App() {
       }else {
         return <Layoutpim/>
       }
-    }
+    } 
   }
   
   return (
@@ -81,7 +83,9 @@ function App() {
           <Route path="/dashboard/master/detailtabel/:id" element={<DetailTabel/>} />
           <Route path="/dashboard/master/tambahdata/:id" element={<TambahData/>} />
           <Route path="/dashboard/master/editdata/:id1/:id2/:id3" element={<EditData/>} />
+          <Route path="/dashboard/log" element={<Log />} />
         </Route>
+        
 
 
 
