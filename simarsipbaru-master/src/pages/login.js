@@ -65,6 +65,7 @@ export const Login = () => {
       const response = await axios.post(`${process.env.REACT_APP_PATH}/login`, {
         username: username,
         password: password,
+        ip: clientIP,
       });
 
       document.cookie = `ip=${clientIP}; Path=/`;

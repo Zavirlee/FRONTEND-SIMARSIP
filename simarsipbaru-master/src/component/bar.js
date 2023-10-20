@@ -42,6 +42,7 @@ export const Bar = () => {
   const handleSubmit = async () => {
     try {
       const response = await axios.post(`${process.env.REACT_APP_PATH}/logout`, {
+        ip: Cookies.get("ip"),
         token: Cookies.get("token"),
         user_id: Cookies.get("user_id")
       });

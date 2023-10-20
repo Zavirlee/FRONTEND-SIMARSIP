@@ -41,6 +41,30 @@ export const Detail = () => {
     }
     
   }
+  const formatTimestamp = (timestamp) => {
+      const date = new Date(timestamp);
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      const seconds = date.getSeconds().toString().padStart(2, '0');
+  
+      return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+  };
+  const formatTimestampRelease = (timestamp) => {
+      const date = new Date(timestamp);
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      const hours = date.getHours().toString().padStart(2, '0');
+      // const minutes = date.getMinutes().toString().padStart(2, '0');
+      // const seconds = date.getSeconds().toString().padStart(2, '0');
+  
+      return `${day}-${month}-${year} `;
+  };
+  
+  
 
   useEffect(() => {
     nonActiveButton()
@@ -189,13 +213,14 @@ export const Detail = () => {
                     {archive.archive_catalog_label}
                   </span>
                 </div>
+                </li>
                 <li className="mb-3 row">
                   <label for="catalog" class="col-sm-2 col-form-label">
                     No Buku
                   </label>
                   <div class="col-sm-9 m-2">
                     <span className="catalog">
-                      : {archive.archive_serial_number}
+                       {archive.archive_serial_number}
                     </span>
                   </div>
                 </li>
@@ -205,11 +230,10 @@ export const Detail = () => {
                   </label>
                   <div class="col-sm-9 m-2">
                     <span className="catalog">
-                      : {archive.archive_file_number}
+                       {archive.archive_file_number}
                     </span>
                   </div>
                 </li>
-              </li>
               <li className="mb-3 row">
                 <label for="tittle" class="col-sm-2 col-form-label">
                   Judul
@@ -224,7 +248,7 @@ export const Detail = () => {
                 </label>
                 <div class="col-sm-9 m-2">
                   <span className="Release_date">
-                    {archive.archive_release_date}
+                    {formatTimestampRelease(archive.archive_release_date)}
                   </span>
                 </div>
               </li>
@@ -233,7 +257,7 @@ export const Detail = () => {
                   Tanggal Input
                 </label>
                 <div class="col-sm-9 m-2">
-                  <span className="timestamp">{archive.archive_timestamp}</span>
+                  <span className="timestamp">{formatTimestamp(archive.archive_timestamp)}</span>
                 </div>
               </li>
               <li className="mb-3 row">

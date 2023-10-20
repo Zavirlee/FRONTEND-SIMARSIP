@@ -12,7 +12,7 @@ const Tabel = ({ data }) => {
   const navigate = useNavigate();
   const [archiveData, setArchiveData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 20;
+  const itemsPerPage = 15;
   const [searchTerm, setSearchTerm] = useState("")
   const [paginatedData, setPaginatedData] = useState([]);
   const [filteredArchiveData, setFilteredArchiveData] = useState([]);
@@ -27,16 +27,16 @@ const Tabel = ({ data }) => {
         Header: "Waktu",
         accessor: "archive_timestamp",
         Cell: ({ value }) => {
-          const options = { day: "numeric", month: "long", year: "numeric" };
-          return new Date(value).toLocaleDateString(undefined, options);
+          const formattedTimestamp = formatTimestamp(value);
+          return formattedTimestamp;
         },
       },
       {
         Header: "Tanggal Terbit",
         accessor: "archive_release_date",
         Cell: ({ value }) => {
-          const options = { day: "numeric", month: "long", year: "numeric" };
-          return new Date(value).toLocaleDateString(undefined, options);
+          const formattedReleaseDate = formatTimestampRelease(value);
+          return formattedReleaseDate;
         },
       },
       {
@@ -112,19 +112,17 @@ const Tabel = ({ data }) => {
 }, [navigate]);
 
 useEffect(() => {
-  const formatDate = (dateStr) => {
-    const options = { year: "numeric", month: "long", day: "numeric" };
-    return new Date(dateStr).toLocaleDateString(undefined, options);
-  };
+
   
   // Filter data based on the searchTerm
   const filteredData = archiveData.filter((archive) => {
     const columnsToSearch = [
-      formatDate(archive.archive_release_date),
+      formatTimestampRelease(archive.archive_release_date),
       archive.archive_type_label,
       archive.archive_catalog_label,
       archive.archive_title,
       archive.archive_agency,
+      archive.archive_code,
       // Add more columns here if needed
     ];
     if (searchParam) {
@@ -151,6 +149,30 @@ useEffect(() => {
   const paginatedData = filteredData.slice(startIndex, endIndex);
   setPaginatedData(paginatedData);
 }, [searchParam, searchTerm, currentPage, archiveData]);
+
+const formatTimestampRelease = (timestamp) => {
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const hours = date.getHours().toString().padStart(2, '0');
+    // const minutes = date.getMinutes().toString().padStart(2, '0');
+    // const seconds = date.getSeconds().toString().padStart(2, '0');
+
+    return `${day}-${month}-${year} `;
+};
+
+const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+
+    return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+};
 
 // useEffect(() => {
 //   document.getElementById("dash").classList.remove("act");
@@ -276,7 +298,7 @@ useEffect(() => {
                   >
                     {row.cells.map((cell) => {
                       return (
-                        <td key={cell.row.id} {...cell.getCellProps()}>
+                        <td key={cell.row.id} {...cell.getCellProps()} className="text-center align-middle">
                           {cell.render("Cell")}
                         </td>
                       );

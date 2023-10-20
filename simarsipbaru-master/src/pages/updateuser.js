@@ -36,6 +36,7 @@ export const UpdateUser = () => {
   };
 
   const validatePassword = (value) => {
+    console.log("validatepassword : ", value)
     if (
       validator.isStrongPassword(value, {
         minLength: 8,
@@ -53,6 +54,7 @@ export const UpdateUser = () => {
 
   const validateConfirmPassword = (value) => {
     setConfirmPassword(value);
+    console.log("validateconfirmpassword : ", value)
 
     if (value === password) {
       setConfirmPasswordErrorMessage("");
@@ -61,13 +63,13 @@ export const UpdateUser = () => {
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+  // const togglePasswordVisibility = () => {
+  //   setShowPassword(!showPassword);
+  // };
 
-  const toggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword(!showConfirmPassword);
-  };
+  // const toggleConfirmPasswordVisibility = () => {
+  //   setShowConfirmPassword(!showConfirmPassword);
+  // };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,7 +79,6 @@ export const UpdateUser = () => {
           navigate("/login");
           return;
         }
-
         const response = await axios.post(
           `${process.env.REACT_APP_PATH}/detailUser`,
           {
@@ -102,19 +103,19 @@ export const UpdateUser = () => {
   };
 
   const handleSubmit = async () => {
+
+    const updatedData = { ...userDataUpdate};
+
     // event.preventDefault();
-
     // const formTambahUser = new FormData(document.getElementById("updateUser"));
-
     // console.log(formTambahUser);
-
     // const data = {};
     // formTambahUser.forEach((value, key) => {
     //   data[key] = value;
     // });
 
-    userDataUpdate["user_id"] = user_id;
-    sendDataToServer(userDataUpdate)
+    sendDataToServer(updatedData)
+    console.log(userDataUpdate)
 
     // try {
     //   const response = await axios.post(
@@ -137,6 +138,9 @@ export const UpdateUser = () => {
 
   const sendDataToServer = async (userDataUpdate) => {
     try {
+      userDataUpdate["user_id"] = user_id;
+      userDataUpdate["password"] = confirmPassword;
+      console.log(userDataUpdate)
       const response = await axios.post(
         `${process.env.REACT_APP_PATH}/uppdateUser`,
         {
@@ -149,6 +153,7 @@ export const UpdateUser = () => {
       handleModalOpen();
     } catch (error) {
       const errorText = error.response.data;
+      console.log(userDataUpdate)
       console.error("Error:", error);
 
       if (errorText === "Error: Username yang anda pilih sudah digunakan") {
@@ -240,13 +245,15 @@ export const UpdateUser = () => {
                     <div className="d-flex justify-content-start align-items-center">
                       <input
                         type={showPassword ? "text" : "password"}
+                        id="password"
                         name="password"
                         className="form-control form-control-md"
                         placeholder="Masukkan Password"
-                        defaultValue={password}
-                        onChange={(e) => validatePassword(e.target.value)}
+                        defaultValue={''}
+                        // onChange={(e) => validatePassword(e.target.value)}
+                        onInput={(e) => validatePassword(e.target.value)}
                       />
-                      <span
+                      {/* <span
                         onClick={togglePasswordVisibility}
                         style={{
                           cursor: "pointer",
@@ -263,7 +270,7 @@ export const UpdateUser = () => {
                         ) : (
                           <BiHide className="fs-5" />
                         )}
-                      </span>
+                      </span> */}
                     </div>
                     <span
                       style={{
@@ -291,14 +298,17 @@ export const UpdateUser = () => {
                       <input
                         type={showConfirmPassword ? "text" : "password"}
                         name="confirmPassword"
+                        id="confirmPassword"
                         className="form-control form-control-md"
                         placeholder="Ulangi Password"
-                        value={confirmPassword}
-                        onChange={(e) =>
-                          validateConfirmPassword(e.target.value)
-                        }
+                        defaultValue={''}
+                        // onChange={(e) =>
+                        //   validateConfirmPassword(e.target.value)
+                        // }
+                        onInput={(e) =>
+                          validateConfirmPassword(e.target.value)}
                       />
-                      <span
+                      {/* <span
                         onClick={toggleConfirmPasswordVisibility}
                         style={{
                           cursor: "pointer",
@@ -315,7 +325,7 @@ export const UpdateUser = () => {
                         ) : (
                           <BiHide className="fs-5" />
                         )}
-                      </span>
+                      </span> */}
                     </div>
                     <span
                       style={{
@@ -332,8 +342,8 @@ export const UpdateUser = () => {
                 </li>
               </ul>
             </div>
-
-            <div className="row d-flex flex-column justify-content-between align-items-end">
+          </form>
+          <div className="row d-flex flex-column justify-content-between align-items-end">
               <input
                 className="col-md-1 me-5 mt-2 mb-2 btn btn-primary"
                 type="submit"
@@ -341,7 +351,6 @@ export const UpdateUser = () => {
                 onClick={handleSubmit}
               />
             </div>
-          </form>
         </div>
       ))}
       {showModal && (

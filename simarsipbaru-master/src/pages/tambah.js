@@ -49,6 +49,7 @@ export const Tambah = () => {
   const [cabinetOption, setCabinetOption] = useState([]);
   const [selectedCabinetOption, setSelectedCabinetOption] = useState("");
   const [errorDataText, setErrorDataText] = useState([]);
+  const [dataKey, setDataKey] = useState([]);
 
   const handleModalOpen = () => {
     // Close the modal when needed
@@ -72,6 +73,13 @@ export const Tambah = () => {
   };
   const handleModalGagalClose = () => {
     setShowModalGagal(false);
+
+    // titleKey.forEach((key) => {
+    //   const element = document.getElementById(key);
+    //   if (element) {
+    //     element.classList.remove("red-border");
+    //   }
+    // });
   };
 
   const handleChangePdf = (e) => {
@@ -112,12 +120,53 @@ export const Tambah = () => {
     data["archive_code"] = archiveCode;
 
     for (const [key, value] of formDataIdentitas.entries()) {
+      console.log("Key : ", key)
       data[key] = value;
+      const titleKey = formDataIdentitas.get(key);
+      const element = document.getElementById(key);
+      
+      if (!titleKey) {
+        element.classList.add("red-border");
+    
+      //   // Create a new <p> element with the "text-danger" class
+      //   const textElement = document.createElement("p");
+      //   textElement.textContent = "This field is required";
+      //   textElement.classList.add("text-danger");
+    
+      //   // Append the text element below the input element
+      //   element.parentNode.appendChild(textElement);
+    
+        setTimeout(() => {
+          element.classList.remove("red-border");
+      //     textElement.remove();
+        }, 5000);
+      }
     }
+    
 
     for (const [key, value] of formDataLokasi.entries()) {
       data[key] = value;
+      const locKey = formDataLokasi.get(key);
+      const element = document.getElementById(key);
+      
+      if (!locKey) {
+        element.classList.add("red-border");
+    
+      //   // Create a new <p> element with the "text-danger" class
+      //   const textElement = document.createElement("p");
+      //   textElement.textContent = "This field is required";
+      //   textElement.classList.add("text-danger");
+    
+      //   // Append the text element below the input element
+      //   element.parentNode.appendChild(textElement);
+    
+        setTimeout(() => {
+          element.classList.remove("red-border");
+      //     textElement.remove();
+        }, 5000);
+      }
     }
+    
 
     try {
       // Assuming 'selectedFile' is a Blob representing the PDF file
@@ -153,6 +202,7 @@ export const Tambah = () => {
       const response = await axios.post(
         `${process.env.REACT_APP_PATH}/addArchive`,
         {
+          ip: Cookies.get("ip"),
           token: Cookies.get("token"),
           data: data,
         }
@@ -414,7 +464,7 @@ export const Tambah = () => {
                 for="archive_file_number"
                 class="col-sm-2 col-form-label ms-4"
               >
-                No Berkas
+                No Naskah
               </label>
               <div class="col-sm-3">
                 <input

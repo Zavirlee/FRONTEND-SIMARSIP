@@ -33,6 +33,7 @@ export const Update = () => {
   const [rollopackOption, setRollopackOption] = useState([]);
   const [cabinetOption, setCabinetOption] = useState([]);
   const [archiveFileName, setArchiveFileName] = useState(null);
+  const [archiveCodeData, setArchiveCodeData] = useState([]);
   const inputFileRef = useRef(null);
 
   const archiveFileNameRef = useRef(null);
@@ -44,7 +45,7 @@ export const Update = () => {
       setShowModal(false);
       navigate(`/dashboard/tabel/detail/${archive_id}`);
       // navigate(`/dashboard/user`);
-    // window.location.reload();
+      // window.location.reload();
     }, 2000);
   };
   const handleModalClose = () => {
@@ -76,7 +77,8 @@ export const Update = () => {
       ...prevData,
       [name]: value,
     }));
-    console.log(archiveDataupdate);
+    // setArchiveData({ ...archiveData, archive_code: archiveCodeData });
+    console.log("DATA UPDATE : ", archiveDataupdate);
   };
 
   const handleSubmit = async () => {
@@ -95,10 +97,13 @@ export const Update = () => {
   const sendDataToServer = async (archiveDataupdate) => {
     try {
       archiveDataupdate["archive_id"] = archive_id.toString();
+      archiveDataupdate["archive_code"] = archiveCodeData.toString()
+      archiveDataupdate["archive_serial_number"] = serialNumberValue;
       console.log(archiveDataupdate);
       const response = await axios.post(
         `${process.env.REACT_APP_PATH}/updateArchive`,
         {
+          ip: Cookies.get("ip"),
           token: Cookies.get("token"),
           data: archiveDataupdate,
         }
@@ -136,6 +141,10 @@ export const Update = () => {
         const archivedata = response.data;
         const { archive_file } = response.data[0];
         const { archive_title } = response.data[0];
+        const { archive_code } = response.data[0];
+
+        console.log(archivedata[0])
+
 
         archiveFileNameRef.current = archive_title;
 
@@ -146,10 +155,15 @@ export const Update = () => {
         );
 
         const url = `data:application/pdf;base64,${base64Data}`;
+        
 
         setArchiveData(archivedata);
         setArchiveFileName(archive_title);
+        setSerialNumberValue(archivedata[0].archive_serial_number);
+        setCatalogValue(archivedata[0].archive_catalog_id)
+        setArchiveCodeData(archivedata[0].archive_code);
         setViewPdf(url);
+        console.log(archivedata)
       } catch (error) {
         console.log("Error", error);
       }
@@ -284,6 +298,7 @@ export const Update = () => {
     const archiveCode = `${catalogValue}/${serialNumberValue}`;
     const archiveCodeElement = document.getElementById("archive_code");
     if (archiveCodeElement) {
+      setArchiveCodeData(archiveCode);
       archiveCodeElement.textContent = `${archiveCode}`;
       console.log("Archive Code:", archiveCode);
     }
@@ -305,12 +320,21 @@ export const Update = () => {
                     Kode Arsip
                   </label>
                   <div class="col-sm-9 m-2">
-                    <span
+                    {/* <span
                       id="archive_code"
                       name="archive_code"
                       defaultValue={archive.archive_code}
                       onChange={handleChange}
-                    ></span>
+                    ></span> */}
+                    <input
+                      type="text"
+                      className="form-control"
+                      readOnly
+                      id="archive_code"
+                      name="archive_code"
+                      value={archiveCodeData}
+                    />
+                  
                   </div>
                 </li>
                 <li className="mb-3 row">
@@ -362,8 +386,12 @@ export const Update = () => {
                       id="archive_serial_number"
                       name="archive_serial_number"
                       placeholder="masukkan no buku"
-                      defaultValue={archive.archive_serial_number}
-                      onInput={(e) => setSerialNumberValue(e.target.value)}
+                    // value={serialNumberValue}
+                    defaultValue={archive.archive_serial_number}
+                    // defaultValue={{
+                    //   value: archive.archive_serial_number
+                    // }}
+                     onInput={(e) => setSerialNumberValue(e.target.value)}
                       onChange={(e) => setSerialNumberValue(e.target.value)}
                     />
                   </div>
@@ -371,7 +399,7 @@ export const Update = () => {
                     for="archive_file_number"
                     class="col-sm-2 col-form-label "
                   >
-                    No Berkas
+                    No Naskah
                   </label>
                   <div class="col-sm-3">
                     <input
