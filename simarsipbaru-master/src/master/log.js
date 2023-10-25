@@ -2,13 +2,16 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
+import { ImSearch } from "react-icons/im";
 
 const Log = () => {
   const [logData, setLogData] = useState([]);
   const [paginatedData, setPaginatedData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 15;
+  const itemsPerPage = 10;
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredLogData, setFilteredLogData] = useState([]);
 
   useEffect(() => {
     document.getElementById("log").classList.add("act");
@@ -44,11 +47,29 @@ const Log = () => {
     }
   };
   useEffect(() => {
+    const filteredLog = logData.filter((log) => {
+      const columnsToSearch = [
+        log.timestamp,
+        log.action,
+        log.ip.replace(/^::ffff:/, ""),
+        log.username,
+        // Add more columns here if needed
+      ];
+      
+
+      return columnsToSearch.some(
+        (column) =>
+          column &&
+          column.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    });
+    setFilteredLogData(filteredLog);
+
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const paginatedData = logData.slice(startIndex, endIndex);
+    const paginatedData = filteredLogData.slice(startIndex, endIndex);
     setPaginatedData(paginatedData);
-  }, [currentPage, logData]);
+  }, [searchTerm, currentPage, logData]);
 
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
@@ -90,6 +111,17 @@ const Log = () => {
   };
   const handlePageChange = (page) => {
     setCurrentPage(page);
+  };  // Handle search button click
+  const handleSearchClick = () => {
+    navigate(`/dashboard/log?search=${encodeURIComponent(searchTerm)}`);
+  };
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleSearchClick();
+    }
   };
 
   return (
@@ -98,6 +130,22 @@ const Log = () => {
         <div id="table" className="bg-white rounded p-3 col-12">
           <div className="d-flex justify-content-between align-items-center">
             <h1 className="m-0">Log Aktivitas</h1>
+            <div className="col-4 col-md-6 col-lg-4 d-flex align-items-center justify-content-end">
+              <div className="input-group">
+                <input
+                  id="search"
+                  type="text"
+                  placeholder="Cari Log"
+                  className="form-control"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  onKeyUp={handleKeyPress}
+                />
+                <span className="input-group-text" onClick={handleSearchClick}>
+                  <ImSearch />
+                </span>
+              </div>
+            </div>
           </div>
 
           <div className="table-responsive mt-3">
@@ -114,7 +162,7 @@ const Log = () => {
               <tbody>
                 {paginatedData.map((log, index) => (
                   <tr key={log.log_id}>
-                    <td className="text-center">{index + 1}</td>
+                    <td className="text-center">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                     <td className="text-center">{log.timestamp}</td>
                     <td className="text-center">{log.action}</td>
                     <td className="text-center">

@@ -125,7 +125,7 @@ export const User = ({ data }) => {
             user.level_user_label,
             mapLoginSession(user.login_session),
             user.satker,
-            formatTimestamp(user.last_login)
+            formatTimestamp(user.last_login),
             // Add more columns here if needed
           ];
           console.log(user.last_login)

@@ -19,6 +19,7 @@ export const UpdateUser = () => {
   const [showModal, setShowModal] = useState(false);
   const { user_id } = useParams();
   const [userDataUpdate, setUserDataUpdate] = useState([]);
+  const [passwordCheck, setPasswordCheck] = useState([])
   const navigate = useNavigate();
 
   const handleModalOpen = () => {
@@ -37,6 +38,7 @@ export const UpdateUser = () => {
 
   const validatePassword = (value) => {
     console.log("validatepassword : ", value)
+    setPasswordCheck(value)
     if (
       validator.isStrongPassword(value, {
         minLength: 8,
@@ -56,7 +58,7 @@ export const UpdateUser = () => {
     setConfirmPassword(value);
     console.log("validateconfirmpassword : ", value)
 
-    if (value === password) {
+    if (value === passwordCheck) {
       setConfirmPasswordErrorMessage("");
     } else {
       setConfirmPasswordErrorMessage("Konfirmasi Password Tidak Sama");

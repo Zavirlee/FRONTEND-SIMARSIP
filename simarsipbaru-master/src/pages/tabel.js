@@ -12,7 +12,7 @@ const Tabel = ({ data }) => {
   const navigate = useNavigate();
   const [archiveData, setArchiveData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 15;
+  const itemsPerPage = 10;
   const [searchTerm, setSearchTerm] = useState("")
   const [paginatedData, setPaginatedData] = useState([]);
   const [filteredArchiveData, setFilteredArchiveData] = useState([]);
@@ -183,15 +183,16 @@ const formatTimestamp = (timestamp) => {
   const handleDetail = async (archive_id) => {
     try {
       const role = Cookies.get('role')
-      if (role !== 'pimpinan') {
-        navigate(`/dashboard/tabel/detail/${archive_id}`, {
-          state: { archiveData },
-        });
-      }
-      else {
+
+      if (role ==='pimpinan'&& currentPath===`/pimpinan/tabel` ||role ==='admin'&& currentPath===`/pimpinan/tabel` ){
         navigate(`/pimpinan/tabel/detail/${archive_id}`, {
           state: { archiveData },
-        });
+          });
+      }
+      else{
+        navigate(`/dashboard/tabel/detail/${archive_id}`, {
+        state: { archiveData },
+          });
       }
     } catch (error) {
       console.log("Error", error);
